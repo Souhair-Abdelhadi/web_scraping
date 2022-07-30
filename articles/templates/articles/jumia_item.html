@@ -1,0 +1,61 @@
+{% extends 'base_layout.html' %}
+
+
+{% block content %}
+    <h1>Jumia list</h1>
+    <div class="articles" id="articles">
+        {% for item in items %}
+            
+            <script> 
+                var list = JSON.parse('{{ item|safe }}')
+                // console.log(list)
+                var root = document.getElementById('articles')
+                var div = document.createElement("div")
+                var h2 = document.createElement('h2')
+                h2.appendChild(document.createTextNode('Description : ' +list.description))
+                div.appendChild(h2)
+                var p = document.createElement('p')
+                p.appendChild(document.createTextNode('Price : ' +list.price))
+                div.appendChild(p)
+                p = document.createElement('p')
+                p.appendChild(document.createTextNode('Rate : ' +list.rate))
+                div.appendChild(p)
+                root.appendChild(div)
+            </script>
+        {% endfor %}
+
+        {% for item in amazonItems %}
+            
+            <script> 
+                var list = JSON.parse('{{ item|safe }}')
+                console.log(list)
+                // var root = document.getElementById('articles')
+                // var div = document.createElement("div")
+                // var h2 = document.createElement('h2')
+                // h2.appendChild(document.createTextNode('Description : ' +list.description))
+                // div.appendChild(h2)
+                // var p = document.createElement('p')
+                // p.appendChild(document.createTextNode('Price : ' +list.price))
+                // div.appendChild(p)
+                // p = document.createElement('p')
+                // p.appendChild(document.createTextNode('Rate : ' +list.rate))
+                // div.appendChild(p)
+                // root.appendChild(div)
+            </script>
+        {% endfor %}
+
+        <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+
+        <script>
+            $.ajax({
+                url: "http://127.0.0.1:8000/articles/test/",
+                dataType: 'json',
+                success: function (data) {
+                    alert(data.message);
+                }
+            });
+        </script>
+
+    </div>
+
+{% endblock %}

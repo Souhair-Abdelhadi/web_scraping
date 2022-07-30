@@ -1,0 +1,253 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'items.css' %}">
+    <title>Items</title>
+</head>
+<body>
+    
+
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <img src="https://i.pinimg.com/originals/d9/93/3c/d9933c4e2c272f33b74ef18cdf11a7d5.gif" alt="loading">
+        </div>
+    </div>
+
+    <div class="show_res" id="items_data" >
+        <div id="res_div" >
+            <p id="res_comparison" >Resultat : <span id="res_text" ></span>  </p>
+        </div>
+        <div class="close_btn" onclick="closeResDiv()" >
+            <img id="close_img" src="{% static 'close.png' %}" alt="close">
+        </div>
+        <div class="items_grid" >
+            <div class="items_d" id="jumia_div">
+                <h2 class="item_title"  >Produits sur Jumia  </h2>
+                <h5 class="item_title" id="jumia_item_title" > </h5>
+                   
+            </div>
+            <div class="items_d"  id="amazon_div">
+                <h2 class="item_title"   >Produits sur amazon</h2>
+                <h5 class="item_title" id="amazon_item_title" > </h5>
+                
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="title">
+            <h1 class="title_text">Scrap items</h1>
+        </div>
+        <div class="site_div">
+            <div class="grid">
+                <div class="g-col-6" id="site-1">
+                        
+                </div>
+                <div class="g-col-6" id="site-2">
+                        
+                </div>
+            </div>
+        </div>
+        <div class="search_div" >
+            <select class="form-select bg-secondary" id="_search_value"  aria-label="Default select example">
+                <option  value="" selected>Select item</option>
+                <option value="Apple iphone xs">Apple iphone xs </option>
+                <option value="Apple iphone 12 pro">Apple iphone 12 pro </option>
+                <option value="Apple iphone 13">Apple iphone 13 </option>
+                <option value="Apple iphone xr">Apple iphone xr </option>
+                <option value="Samsung galaxy m22">Samsung galaxy m22</option>
+                <option value="Samsung galaxy note20">Samsung galaxy note20</option>
+                <option value="Samsung galaxy A12">Samsung galaxy A12</option>
+                <option value="Samsung galaxy s10">Samsung galaxy s10</option>
+                
+              </select>
+            <br>
+            <button type="button" onclick="getData()" class="btn btn-primary" id="_search_button">Scrap</button>
+        </div>
+
+    </header>
+
+
+   
+
+    <footer>
+        <div class="text">
+            <h3>WEB SCRAPING</h3>
+        </div>        
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>  
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script>
+        
+
+        var jumia_mid_price = 0, jumia_items_length = 0, jumia_loaded = false
+        var amazon_mid_price = 0, amazon_items_length = 0, amazon_loaded = false
+
+        function getData(){
+            $(".item").remove()
+            var item = document.getElementById('_search_value').value
+            if( typeof item === 'undefined' || item === null || item.length == 0 ){
+                alert("You should give an item to scrap!!")
+                return
+            }
+            $('#staticBackdrop').modal('show')
+            $.ajax({
+                url: "http://127.0.0.1:8000/jumia_api?q="+item,
+                dataType: 'json',
+                method : 'GET',
+                headers: {
+                    'Content-Type':'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                } ,
+                success: function (data) {
+                    jumia_loaded = true
+                    console.log(data.list)
+                    console.log("jumia mid price :",data.moy)
+                    var v_price = 0
+                    data.list.forEach(element => {
+                        v_price = parseFloat(JSON.parse(element).price.split(" ")[0].replace(",",""))
+                        if( v_price.toFixed(2) > data.moy ){
+                            jumia_items_length += 1
+                            jumia_mid_price+=v_price
+                            var item = document.getElementById('jumia_div')
+                            var parentDiv = document.createElement("div")
+                            var div = document.createElement("div")
+                            var h3 = document.createElement("h3")
+                            h3.innerHTML = "Produit : " + JSON.parse(element).description
+                            var price = document.createElement("h3")
+                            price.innerHTML = "Prix : " + JSON.parse(element).price
+                            div.appendChild(h3)
+                            div.appendChild(price)
+                            parentDiv.appendChild(div)
+                            div = document.createElement("div")
+                            var img  = document.createElement("img")
+                            img.classList.add("item_img")
+                            img.src = JSON.parse(element).image
+                            div.appendChild(img)
+                            parentDiv.appendChild(div)
+                            parentDiv.classList.add("item")
+                            item.appendChild(parentDiv)
+                        }
+                        
+                    })
+                    if(amazon_loaded && jumia_loaded){
+                        $('#staticBackdrop').modal('hide')
+                        $('#items_data').show("1s")
+                    }
+                },
+                timeout : 20000,
+                complete : function(jq,textStatus){
+                    console.log("amazon : ",amazon_loaded,"jumia :",jumia_loaded)
+                    if(jumia_loaded){
+                        jumia_mid_price =  (jumia_mid_price / jumia_items_length)
+                        document.getElementById('jumia_item_title').innerHTML = " moyenne : " + jumia_mid_price.toFixed(2) + " DHS "
+                    }
+
+                    if(amazon_loaded && jumia_loaded ){
+                        $('#items_data').show("1s")
+                        //amazon_mid_price = (amazon_mid_price /  amazon_items_length)  * 9.7
+                        if(jumia_mid_price > amazon_mid_price){
+                            document.getElementById('res_text').innerHTML = "Les prix sur amazon sont moins chèr que celles sur jumia"
+                        }
+                        else {
+                            document.getElementById('res_text').innerHTML = "Les prix sur jumia sont moins chèr que celles sur amazon"
+                        }
+                        amazon_loaded = false,jumia_loaded = false
+                        jumia_items_length = 0, amazon_items_length = 0
+                        jumia_mid_price = 0 , amazon_mid_price = 0
+                    }
+                },
+                error: function (jq,status,error) {
+                    $('#staticBackdrop').modal('hide')
+                    alert('error occured whilte extracting data from jumia')
+                }
+            });
+
+            $.ajax({
+                url: "http://127.0.0.1:8000/amazon_api?q="+item,
+                dataType: 'json',
+                method : 'GET',
+                headers: {
+                    'Content-Type':'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                } ,
+                success: function (data) {
+                    amazon_loaded = true
+                    console.log(data.list)
+                    amazon_mid_price = 0
+                    amazon_items_length = 1
+                    //console.log(JSON.parse(data.list[0]).price)
+                    data.list.forEach((element)=>{
+                        var el = JSON.parse(element)
+                        var price  = parseFloat(el.price.replace(" ",""))
+                        amazon_mid_price += price
+                        var item = document.getElementById('amazon_div')
+                        var parentDiv = document.createElement("div")
+                        var div = document.createElement("div")
+                        var h3 = document.createElement("h3")
+                        h3.innerHTML = "Produit : " + JSON.parse(element).title
+                        var price = document.createElement("h3")
+                        price.innerHTML = "Prix : " + JSON.parse(element).price + " euro | "+ (parseFloat(el.price.replace(" ","")) * 9.7).toFixed(2) + " DHS"
+                        div.appendChild(h3)
+                        div.appendChild(price)
+                        parentDiv.appendChild(div)
+                        div = document.createElement("div")
+                        var img  = document.createElement("img")
+                        img.classList.add("item_img")
+                        img.src = JSON.parse(element).image
+                        div.appendChild(img)
+                        parentDiv.appendChild(div)
+                        parentDiv.classList.add("item")
+                        item.appendChild(parentDiv)
+                    })
+                    amazon_items_length = data.list.length > 0 ? data.list.length : 1
+
+                    if(amazon_loaded && jumia_loaded){
+                        $('#staticBackdrop').modal('hide')
+                        $('#items_data').show("1s")
+                        
+                    }
+                   
+                },
+                complete : function(){
+                    console.log("amazon : ",amazon_loaded,"jumia :",jumia_loaded)
+                    if(amazon_loaded && jumia_loaded ){
+                        $('#items_data').show("1s")
+                        amazon_mid_price = (amazon_mid_price /  amazon_items_length)  * 9.7
+                        document.getElementById('amazon_item_title').innerHTML = " moyenne : " + amazon_mid_price.toFixed(2) + " DHS "
+                        if(jumia_mid_price > amazon_mid_price){
+                            document.getElementById('res_text').innerHTML = "Les prix sur amazon sont moins chèr que celles sur jumia"
+                        }
+                        else {
+                            document.getElementById('res_text').innerHTML = "Les prix sur jumia sont moins chèr que celles sur amazon"
+                        }
+                        amazon_loaded = false,jumia_loaded = false
+                        jumia_items_length = 0, amazon_items_length = 0
+                        jumia_mid_price = 0 , amazon_mid_price = 0
+                    }
+                    console.log("amazon mid :" , amazon_mid_price )
+                }
+                ,
+                error : function(jqXHR,textStatus,err){
+                    $('#staticBackdrop').modal('hide')
+                    alert('error occured whilte extracting data from amazon')
+                    console.log("error returned")
+                }
+            });
+        }
+
+        function closeResDiv(){
+            $('#items_data').hide("1s")
+        }
+
+    </script>
+
+</body>
+</html>
