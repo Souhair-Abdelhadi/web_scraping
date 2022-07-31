@@ -1,10 +1,5 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 
-def homepage(request):
-    #return HttpResponse('home page')
-    return render(request,'homepage.html')
-
-def about(request):
-    #return HttpResponse('home page')
-    return render(request,'about.html')
+def pageNotFound(request,exception):
+    return render(request,"pageNotFound.html",status=404)

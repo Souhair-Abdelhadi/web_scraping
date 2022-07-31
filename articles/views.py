@@ -23,9 +23,6 @@ def article_list(request):
 def item(request):
     return render(request,'articles/item.html')
 
-def pageNotFound(request):
-    return render(request,"articles/pageNotFound.html")
-
 def article_details(request,slug):
     return HttpResponse(slug)
 

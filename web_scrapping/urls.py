@@ -33,3 +33,5 @@ urlpatterns = [
     path("",include(static_urlpatterns))
 ]
  
+
+handler404 = "web_scrapping.views.pageNotFound"
