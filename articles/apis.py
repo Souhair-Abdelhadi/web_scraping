@@ -12,13 +12,12 @@ from urllib.error import URLError
 from urllib.parse import urlparse
 from urllib.error import URLError
 from bs4 import BeautifulSoup
-from requests import RequestException, request
+from requests import request
 import requests
 import re
-import string
 
 
-class Articles(View):
+class Jumia(View):
     def get(self,request):
         list = []
         HEADERS = ({'User-Agent':'Mozilla/5.0 (X11; Linux x86_64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36',
@@ -73,11 +72,12 @@ class Amazon(View):
     def get(slef,request):
         a_list = []
         moy = 0
+        item = request.GET.get('q','')
         HEADERS = ({'User-Agent':'Mozilla/5.0 (X11; Linux x86_64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36',
                     'Accept-Language': 'fr-Fr, fr;q=0.5'})
         for page in range(1,5):
             try:
-                html = requests.get("https://www.amazon.fr/s?k={}&page={}".format(request.GET.get('q',''),page),headers=HEADERS)
+                html = requests.get("https://www.amazon.fr/s?k={}&page={}".format(item,page),headers=HEADERS)
                 bs = BeautifulSoup(html.text,'lxml')
                 nameList = bs.find_all('div',{'class' : 'sg-col-inner'})
                 #nameList = bs.select("span.a-price-whole")
@@ -121,6 +121,8 @@ class Amazon(View):
                             a_rate = rate.get_text()
                         if img is not None:
                             a_img = img['src']
+                        # if title.get_text().find(item) != -1:
+                        #     print("amazon api test executed")
                         a_list.append(json.dumps({'price':a_price,'title':a_title,'description':re.sub('"','',a_description),'rate':a_rate
                             ,'image':a_img}))
                         if len(a_list) > 20:
