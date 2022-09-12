@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <base href="/">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous"/>
-    <link rel="stylesheet" type="text/css" href="static/items.css">
+    <link rel="stylesheet" type="text/css" href="static/items.css?2571">
     <title>Items</title>
 </head>
 <body>
@@ -26,17 +26,28 @@
         <div class="close_btn" onclick="closeResDiv()" >
             <img id="close_img" src="{% static 'close.png' %}" alt="close">
         </div>
-        <div class="items_grid" >
+        <div class="items_grid" style="height: 600px ;"  >
             <div class="items_d" id="jumia_div">
                 <h2 class="item_title"  >Produits sur Jumia  </h2>
                 <h5 class="item_title" id="jumia_item_title" > </h5>
-                   
+                <div id="jumia-items-section">
+
+                </div>
+                <div class="download_button"  id="download_jumia_csv" >
+                    <button class="btn btn-success"  onclick="downloadJumiaList()" >Télécharger les données </button>
+                </div>
             </div>
             <div class="items_d"  id="amazon_div">
                 <h2 class="item_title"   >Produits sur amazon</h2>
                 <h5 class="item_title" id="amazon_item_title" > </h5>
-                
+                <div id="amazon-items-section">
+
+                </div>
+                <div class="download_button" id="download_amazon_csv" >
+                    <button class="btn btn-success"  onclick="downloadAmazonList()" >Télécharger les données </button>
+                </div>
             </div>
+            
         </div>
     </div>
 
@@ -55,18 +66,27 @@
             </div>
         </div>
         <div class="search_div" >
-            <select class="form-select bg-secondary" id="_search_value"  aria-label="Default select example">
-                <option  value="" selected>Select item</option>
-                <option value="Apple iphone xs">Apple iphone xs </option>
-                <option value="Apple iphone 12 pro">Apple iphone 12 pro </option>
-                <option value="Apple iphone 13">Apple iphone 13 </option>
-                <option value="Apple iphone xr">Apple iphone xr </option>
-                <option value="Samsung galaxy m22">Samsung galaxy m22</option>
-                <option value="Samsung galaxy note20">Samsung galaxy note20</option>
-                <option value="Samsung galaxy A12">Samsung galaxy A12</option>
-                <option value="Samsung galaxy s10">Samsung galaxy s10</option>
-                
-              </select>
+            
+              <div style="display: inline-flex ;cursor: pointer;">
+                <img onclick="switchFunc()" class="switch_icon" src="{% static 'switch_icon.png' %}" 
+                 title="Changer type de recherche" alt="Changer type de recherche">
+                <div class="select_search" id="select_search" >
+                    <select class="form-select bg-secondary" id="select_search_value"  aria-label="Default select example">
+                        <option  value="" selected>Select item</option>
+                        <option value="Apple iphone xs">Apple iphone xs </option>
+                        <option value="Apple iphone 12 pro">Apple iphone 12 pro </option>
+                        <option value="Apple iphone 13">Apple iphone 13 </option>
+                        <option value="Apple iphone xr">Apple iphone xr </option>
+                        <option value="Samsung galaxy m22">Samsung galaxy m22</option>
+                        <option value="Samsung galaxy note20">Samsung galaxy note20</option>
+                        <option value="Samsung galaxy A12">Samsung galaxy A12</option>
+                        <option value="Samsung galaxy s10">Samsung galaxy s10</option>
+                      </select>
+                </div>
+                <div class="text_input_search" id="text_input_search" >
+                    <input class="_search_input" type="text" required id="input_search_value">
+                </div>
+              </div>
             <br>
             <button type="button" onclick="getData()" class="btn btn-primary" id="_search_button">Scrap</button>
         </div>
@@ -88,12 +108,13 @@
     <script>
         
 
-        var jumia_mid_price = 0, jumia_items_length = 0, jumia_loaded = false
-        var amazon_mid_price = 0, amazon_items_length = 0, amazon_loaded = false
+        var jumia_mid_price = 0, jumia_items_length = 0, jumia_loaded = false,jumia_items_list = []
+        var amazon_mid_price = 0, amazon_items_length = 0, amazon_loaded = false, amazon_items_list = []
+        var switched = false
 
         function getData(){
             $(".item").remove()
-            var item = document.getElementById('_search_value').value
+            var item = !switched ? document.getElementById('select_search_value').value : document.getElementById('input_search_value').value
             if( typeof item === 'undefined' || item === null || item.length == 0 ){
                 alert("You should give an item to scrap!!")
                 return
@@ -112,12 +133,14 @@
                     console.log(data.list)
                     console.log("jumia mid price :",data.moy)
                     var v_price = 0
+                    jumia_items_list = []
                     data.list.forEach(element => {
                         v_price = parseFloat(JSON.parse(element).price.split(" ")[0].replace(",",""))
                         if( v_price.toFixed(2) > data.moy ){
+                            jumia_items_list.push(JSON.parse(element))
                             jumia_items_length += 1
                             jumia_mid_price+=v_price
-                            var item = document.getElementById('jumia_div')
+                            var item = document.getElementById('jumia-items-section')
                             var parentDiv = document.createElement("div")
                             var div = document.createElement("div")
                             var h3 = document.createElement("h3")
@@ -187,9 +210,10 @@
                     //console.log(JSON.parse(data.list[0]).price)
                     data.list.forEach((element)=>{
                         var el = JSON.parse(element)
+                        amazon_items_list.push(el)
                         var price  = parseFloat(el.price.replace(" ",""))
                         amazon_mid_price += price
-                        var item = document.getElementById('amazon_div')
+                        var item = document.getElementById('amazon-items-section')
                         var parentDiv = document.createElement("div")
                         var div = document.createElement("div")
                         var h3 = document.createElement("h3")
@@ -246,6 +270,61 @@
 
         function closeResDiv(){
             $('#items_data').hide("1s")
+        }
+
+        function downloadJumiaList(){
+            console.log("button clicked")
+            var csv = "Price;Description;Rate;Image\n"
+            jumia_items_list.forEach(row => {
+                csv+= row.price + " DH"+";"+row.description+";"+row.rate+";"+row.image+"\n"
+            })
+
+            var item = !switched ? document.getElementById('select_search_value').value : document.getElementById('input_search_value').value
+            var hiddenElement = document.createElement('a');  
+            hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);  
+            hiddenElement.target = '_blank';  
+            var date = new Date()
+            var year = date.getFullYear()
+            var month = date.getUTCMonth() < 10 ? "0"+date.getUTCMonth() : date.getUTCMonth() 
+            var day = date.getUTCDay() < 10 ? "0"+date.getUTCDay() : date.getUTCDay()
+            var time = date.getUTCHours()+":"+date.getUTCMinutes()+":"+date.getUTCSeconds()
+            var dateString = ""+year+"/"+month+"/"+day
+            hiddenElement.download = "jumia_"+item+"_"+dateString+"_"+time+".csv"
+            hiddenElement.click()
+        }
+
+
+        function downloadAmazonList(){
+            var csv = "Price;Title;Description;Rate;Image\n"
+            amazon_items_list.forEach(row => {
+                csv+= (parseFloat(row.price.replace(",",".")) * 9.7 ).toFixed(2)+ " DH"+";"+row.title+";"+row.description+";"+row.rate+";"+row.image+"\n"
+            })
+
+            var item = !switched ? document.getElementById('select_search_value').value : document.getElementById('input_search_value').value
+            var hiddenElement = document.createElement('a');  
+            hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);  
+            hiddenElement.target = '_blank';  
+            var date = new Date()
+            var year = date.getFullYear()
+            var month = date.getUTCMonth() < 10 ? "0"+date.getUTCMonth() : date.getUTCMonth() 
+            var day = date.getUTCDay() < 10 ? "0"+date.getUTCDay() : date.getUTCDay()
+            var time = date.getUTCHours()+":"+date.getUTCMinutes()+":"+date.getUTCSeconds()
+            var dateString = ""+year+"/"+month+"/"+day
+            hiddenElement.download = "amazon_"+item+"_"+dateString+"_"+time+".csv"
+            hiddenElement.click()
+        }
+
+        function switchFunc(){
+            if(!switched){
+                switched = !switched
+                document.getElementById('select_search').style.display = 'none'
+                document.getElementById('text_input_search').style.display = 'block'
+            }
+            else {
+                switched = !switched
+                document.getElementById('select_search').style.display = 'block'
+                document.getElementById('text_input_search').style.display = 'none'
+            }
         }
 
     </script>
